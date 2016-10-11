@@ -175,33 +175,41 @@ int music_list_print(music_obj *m)
 end:
 	return 0;
 }
+
 int main()
 {
 	int retvalue = -1;
 	int fd;
-	music_obj *g_m;
+	struct op *o_obj;
+	music_obj *m_obj;
 
-	music_list_alloc(&g_m, 20);
-	music_list_init(g_m);
+	/*music list init*/
+	music_list_alloc(&m_obj, 20);
+	music_list_init(m_obj);
 
+	/*config file init*/
 	fd = file_create("./config");
 	if (fd == -1) {
 		retvalue = -1;
 		goto end;
 	}
 
-	struct op *o_obj;
-	op_init(&o_obj, fd, g_m);
+	/*file operate init*/
+	op_init(&o_obj, fd, m_obj);
 	op_reg_low_output(o_obj, low_output_cb);
 	op_reg_high_output(o_obj, high_output_cb);
 	op_reg_low_input(o_obj, low_input_cb);
 
-	machine_close(o_obj, g_m);
-	machine_open(o_obj);
-	music_list_print(g_m);
+	/*machine close test*/
+	machine_close(o_obj, m_obj);
 
+	/*machine open test*/
+	machine_open(o_obj);
+	music_list_print(m_obj);
+
+	/*memory recycle*/
 	op_delete(&o_obj);
-	music_list_destroy(&g_m);
+	music_list_destroy(&m_obj);
 end:
 	return retvalue;
 }
