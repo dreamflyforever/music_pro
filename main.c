@@ -4,7 +4,6 @@
 #include "json_op.h"
 #include "music_list.h"
 
-music_obj *g_m;
 int music_list_init(music_obj *m)
 {
 	int retvalue = 1;
@@ -45,8 +44,9 @@ end:
 }
 
 /*user callback*/
-int high_output_cb(char *a, char *b, char *c)
+int high_output_cb(void *context, char *a, char *b, char *c)
 {
+	music_obj *m = (music_obj *)context;
 	int retvalue = 1;
 	if ((a == NULL) || (b == NULL) || (c == NULL)) {
 		retvalue = -1;
@@ -56,7 +56,7 @@ int high_output_cb(char *a, char *b, char *c)
 	print("[%s] [%s] [%s]\n", a, b, c);
 	music_info *tmp;
 	music_info_alloc(&tmp, a, b, c);
-	music_list_insert(g_m, tmp);
+	music_list_insert(m, tmp);
 end:
 	return retvalue;
 }
@@ -179,6 +179,7 @@ int main()
 {
 	int retvalue = -1;
 	int fd;
+	music_obj *g_m;
 
 	music_list_alloc(&g_m, 20);
 	music_list_init(g_m);
@@ -190,7 +191,7 @@ int main()
 	}
 
 	struct op *o_obj;
-	op_init(&o_obj, fd);
+	op_init(&o_obj, fd, g_m);
 	op_reg_low_output(o_obj, low_output_cb);
 	op_reg_high_output(o_obj, high_output_cb);
 	op_reg_low_input(o_obj, low_input_cb);
