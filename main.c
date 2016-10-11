@@ -51,6 +51,7 @@ int high_output_cb(char *a, char *b, char *c)
 		retvalue = -1;
 		goto end;
 	}
+
 	print("[%s] [%s] [%s]\n", a, b, c);
 end:
 	return retvalue;
@@ -122,9 +123,20 @@ int machine_close(struct op *o, music_obj *m)
 	return 0;
 }
 
-int machine_open()
+int machine_open(struct op *o)
 {
-	return 0;
+	int retvalue = -1;
+	retvalue = op_low_input(o);
+	if (retvalue == -1) {
+		goto end;
+	}
+
+	int i;
+	for (i = 0; i < 20; i++) {
+		op_high_output(o, i);
+	}
+end:
+	return retvalue;
 }
 
 int main()
@@ -149,6 +161,8 @@ int main()
 	op_reg_low_input(o_obj, low_input_cb);
 
 	machine_close(o_obj, g_m);
+	machine_open(o_obj);
+
 	op_delete(&o_obj);
 	music_list_destroy(&g_m);
 end:
