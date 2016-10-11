@@ -2,7 +2,32 @@
 #include <stdio.h>
 #include "fop.h"
 #include "json_op.h"
+#include "music_list.h"
 
+int music_list_init(music_obj *m)
+{
+	int retvalue = 1;
+	music_info *tmp;
+	int i = 100;
+	while (i--) {
+		music_info_alloc(&tmp, "a", "b", "c");
+		music_list_insert(m, tmp);
+
+		music_info_alloc(&tmp, "d", "e", "f");
+		music_list_insert(m, tmp);
+
+		music_info_alloc(&tmp, "1", "2", "3");
+		music_list_insert(m, tmp);
+
+		music_info_alloc(&tmp, "4", "5", "6");
+		music_list_insert(m, tmp);
+
+		music_info_alloc(&tmp, "4", "5", "6");
+		music_list_insert(m, tmp);
+	}
+
+	return retvalue;
+}
 
 /*user callback*/
 int low_output_cb(int arg, char *s, int size)
@@ -45,9 +70,55 @@ end:
 	return retvalue;
 }
 
-int machine_close(struct op *o)
+int node_get(struct op *o, music_obj *m)
 {
+	int retvalue = -1;
+	int i = 0;
+	music_info *tmp;
 
+	/*for music list current point move to beginning*/
+	while (1) {
+		tmp = music_prev_get(m);
+		if (tmp == NULL)
+			break;
+	}
+
+	print("insert node:\n");
+	/*insert first music list node*/
+	tmp = music_cur_get(m);
+	if (tmp != NULL) {
+		print("[title:artist:url] [%s : %s : %s]\n",
+			tmp->title, tmp->artist, tmp->url);
+
+		/*wrap cjson format*/
+		op_high_input(i, o, tmp->title, tmp->artist, tmp->url);
+		i++;
+	} else {
+		print("no node\n");
+		goto end;
+	}
+	/*loop get next music list node*/
+	while (1) {
+		tmp = music_next_get(m);
+		if (tmp == NULL) {
+			break;
+		} else {
+			print("[title:artist:url] [%s : %s : %s]\n",
+				tmp->title, tmp->artist, tmp->url);
+
+			/*wrap cjson format*/
+			op_high_input(i, o, tmp->title, tmp->artist, tmp->url);
+			i++;
+		}
+	}
+end:
+	return retvalue;
+}
+
+int machine_close(struct op *o, music_obj *m)
+{
+	node_get(o, m);
+	op_low_output(o);
 	return 0;
 }
 
@@ -61,6 +132,10 @@ int main()
 	int retvalue = -1;
 	int fd;
 
+	music_obj *g_m;
+	music_list_alloc(&g_m, 20);
+	music_list_init(g_m);
+
 	fd = file_create("./config");
 	if (fd == -1) {
 		retvalue = -1;
@@ -73,7 +148,9 @@ int main()
 	op_reg_high_output(o_obj, high_output_cb);
 	op_reg_low_input(o_obj, low_input_cb);
 
+	machine_close(o_obj, g_m);
 	op_delete(&o_obj);
+	music_list_destroy(&g_m);
 end:
 	return retvalue;
 }
