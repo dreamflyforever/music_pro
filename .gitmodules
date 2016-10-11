@@ -1,0 +1,6 @@
+[submodule "music_list"]
+	path = music_list
+	url = https://gitlab.spetechcular.com/shanjin.yang/music_list.git
+[submodule "fop"]
+	path = fop
+	url = https://gitlab.spetechcular.com/shanjin.yang/fop.git
