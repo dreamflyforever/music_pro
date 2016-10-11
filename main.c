@@ -4,6 +4,7 @@
 #include "json_op.h"
 #include "music_list.h"
 
+music_obj *g_m;
 int music_list_init(music_obj *m)
 {
 	int retvalue = 1;
@@ -53,6 +54,9 @@ int high_output_cb(char *a, char *b, char *c)
 	}
 
 	print("[%s] [%s] [%s]\n", a, b, c);
+	music_info *tmp;
+	music_info_alloc(&tmp, a, b, c);
+	music_list_insert(g_m, tmp);
 end:
 	return retvalue;
 }
@@ -139,12 +143,43 @@ end:
 	return retvalue;
 }
 
+int music_list_print(music_obj *m)
+{
+	/*for music list current point move to beginning*/
+	music_info *tmp;
+	while (1) {
+		tmp = music_prev_get(m);
+		if (tmp == NULL)
+			break;
+	}
+
+	tmp = music_cur_get(m);
+	if (tmp != NULL) {
+		print("[title:artist:url] [%s : %s : %s]\n",
+			tmp->title, tmp->artist, tmp->url);
+	} else {
+		print("no node\n");
+		goto end;
+	}
+	/*loop get next music list node*/
+	while (1) {
+		tmp = music_next_get(m);
+		if (tmp == NULL) {
+			break;
+		} else {
+			print("[title:artist:url] [%s : %s : %s]\n",
+				tmp->title, tmp->artist, tmp->url);
+
+		}
+	}
+end:
+	return 0;
+}
 int main()
 {
 	int retvalue = -1;
 	int fd;
 
-	music_obj *g_m;
 	music_list_alloc(&g_m, 20);
 	music_list_init(g_m);
 
@@ -162,6 +197,7 @@ int main()
 
 	machine_close(o_obj, g_m);
 	machine_open(o_obj);
+	music_list_print(g_m);
 
 	op_delete(&o_obj);
 	music_list_destroy(&g_m);
