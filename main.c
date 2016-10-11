@@ -205,6 +205,7 @@ int music_list_print(music_obj *m)
 		print("no node\n");
 		goto end;
 	}
+
 	/*loop get next music list node*/
 	while (1) {
 		tmp = music_next_get(m);
@@ -213,7 +214,6 @@ int music_list_print(music_obj *m)
 		} else {
 			print("[title:artist:url] [%s : %s : %s]\n",
 				tmp->title, tmp->artist, tmp->url);
-
 		}
 	}
 end:
@@ -256,6 +256,7 @@ int main()
 	/*memory recycle*/
 	op_delete(&o_obj);
 	music_list_destroy(&m_obj);
+	close(fd);
 end:
 	return retvalue;
 }
