@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "fop.h"
 #include "json_op.h"
 #include "music_list.h"
@@ -7,6 +10,11 @@
 int music_list_init(music_obj *m)
 {
 	int retvalue = 1;
+	if (m == NULL) {
+		retvalue = -1;
+		print("error\n");
+		goto end;
+	}
 	music_info *tmp;
 	int i = 100;
 	while (i--) {
@@ -25,7 +33,7 @@ int music_list_init(music_obj *m)
 		music_info_alloc(&tmp, "4", "5", "6");
 		music_list_insert(m, tmp);
 	}
-
+end:
 	return retvalue;
 }
 
@@ -33,11 +41,17 @@ int music_list_init(music_obj *m)
 int low_output_cb(int arg, char *s, int size)
 {
 	int retvalue = 1;
+	if (arg <= 0) {
+		print("error\n");
+		retvalue = -1;
+		goto end;
+	}
+
 	if (s == NULL) {
 		retvalue = -1;
 		goto end;
 	}
-	//print("%s [%d]\n", s, size);
+	print("%s [%d]\n", s, size);
 	file_write(arg, s, size);
 end:
 	return retvalue;
@@ -48,7 +62,9 @@ int high_output_cb(void *context, char *a, char *b, char *c)
 {
 	music_obj *m = (music_obj *)context;
 	int retvalue = 1;
-	if ((a == NULL) || (b == NULL) || (c == NULL)) {
+
+	if ((m == NULL) || (a == NULL) || (b == NULL) || (c == NULL)) {
+		print("error\n");
 		retvalue = -1;
 		goto end;
 	}
@@ -64,7 +80,14 @@ end:
 /*user callback*/
 int low_input_cb(int arg, char *s, int size)
 {
+
 	int retvalue = 1;
+
+	if (arg <= 0) {
+		print("error\n");
+		retvalue = -1;
+		goto end;
+	}
 
 	size = file_read(arg, s, size);
 	if (size == -1) {
@@ -77,10 +100,14 @@ end:
 
 int node_get(struct op *o, music_obj *m)
 {
-	int retvalue = -1;
+	int retvalue = 1;
 	int i = 0;
 	music_info *tmp;
-
+	if ((o == NULL) || (m == NULL)) {
+		retvalue = -1;
+		print("error\n");
+		goto end;
+	}
 	/*for music list current point move to beginning*/
 	while (1) {
 		tmp = music_prev_get(m);
@@ -122,14 +149,28 @@ end:
 
 int machine_close(struct op *o, music_obj *m)
 {
-	node_get(o, m);
+	if ((o == NULL) || (m == NULL)) {
+		print("error\n");
+		return 0;
+	}
+	int retvalue = 1;
+	retvalue = node_get(o, m);
+	if (retvalue == -1) {
+		goto end;
+	}
 	op_low_output(o);
-	return 0;
+end:
+	return retvalue;
 }
 
 int machine_open(struct op *o)
 {
 	int retvalue = -1;
+
+	if (o == NULL) {
+		print("error\n");
+	}
+
 	retvalue = op_low_input(o);
 	if (retvalue == -1) {
 		goto end;
@@ -145,6 +186,9 @@ end:
 
 int music_list_print(music_obj *m)
 {
+	if (m == NULL)
+		goto end;
+
 	/*for music list current point move to beginning*/
 	music_info *tmp;
 	while (1) {
@@ -185,7 +229,6 @@ int main()
 
 	/*music list init*/
 	music_list_alloc(&m_obj, 20);
-	music_list_init(m_obj);
 
 	/*config file init*/
 	fd = file_create("./config");
@@ -200,13 +243,16 @@ int main()
 	op_reg_high_output(o_obj, high_output_cb);
 	op_reg_low_input(o_obj, low_input_cb);
 
-	/*machine close test*/
-	machine_close(o_obj, m_obj);
-
 	/*machine open test*/
 	machine_open(o_obj);
 	music_list_print(m_obj);
-
+#if 1
+	/*machine close test*/
+	music_list_init(m_obj);
+	ftruncate(fd, 0);  
+    	lseek(fd, 0, SEEK_SET);
+	machine_close(o_obj, m_obj);
+#endif
 	/*memory recycle*/
 	op_delete(&o_obj);
 	music_list_destroy(&m_obj);
