@@ -62,9 +62,11 @@ int main()
 	/*machine open test*/
 	machine_open(o_obj);
 	music_list_print(m_obj);
+
 #if 1
 	/*machine close test*/
 	music_list_init(m_obj);
+	//music_restart(m_obj);
 	ftruncate(fd, 0);  
     	lseek(fd, 0, SEEK_SET);
 	machine_close(o_obj, m_obj);

@@ -348,3 +348,11 @@ int low_input_cb(int arg, char *s, int size)
 end:
 	return retvalue;
 }
+
+/*clear music list and restart*/
+int music_restart(music_obj *m_obj)
+{
+	music_list_destroy(&m_obj);
+	music_list_alloc(&m_obj, 20);
+	return 0;
+}
