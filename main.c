@@ -7,6 +7,12 @@
 #include "json_op.h"
 #include "music_list.h"
 
+int music_list_current_position(struct op *o, music_obj *m)
+{
+	int retvalue = 1;
+	return 0;
+}
+
 int music_list_init(music_obj *m)
 {
 	int retvalue = 1;
@@ -78,6 +84,26 @@ end:
 }
 
 /*user callback*/
+int cur_output_cb(void *context, char *a, char *b, char *c)
+{
+	music_obj *m = (music_obj *)context;
+	int retvalue = 1;
+
+	if ((m == NULL) || (a == NULL) || (b == NULL) || (c == NULL)) {
+		print("error\n");
+		retvalue = -1;
+		goto end;
+	}
+
+	print("[%s] [%s] [%s]\n", a, b, c);
+	m->cur_tmp->title = strdup(a);
+	m->cur_tmp->artist = strdup(b);
+	m->cur_tmp->url = strdup(c);
+end:
+	return retvalue;
+}
+
+/*user callback*/
 int low_input_cb(int arg, char *s, int size)
 {
 
@@ -109,6 +135,18 @@ int node_get(struct op *o, music_obj *m)
 		goto end;
 	}
 	/*for music list current point move to beginning*/
+	tmp = music_cur_get(m);
+	if (tmp != NULL) {
+		print("[title:artist:url] [%s : %s : %s]\n",
+		tmp->title, tmp->artist, tmp->url);
+
+		/*XXX: magic nubmer is no good, wrap cjson format*/
+		op_high_input(10000, o, tmp->title, tmp->artist, tmp->url);
+	} else {
+		print("no node\n");
+		goto end;
+	}
+	
 	while (1) {
 		tmp = music_prev_get(m);
 		if (tmp == NULL)
@@ -171,11 +209,13 @@ int machine_open(struct op *o)
 		print("error\n");
 	}
 
+	/*read low config message to op buf*/
 	retvalue = op_low_input(o);
 	if (retvalue == -1) {
 		goto end;
 	}
 
+	/*output op buf message to high layer*/
 	int i;
 	for (i = 0; i < 20; i++) {
 		op_high_output(o, i);
