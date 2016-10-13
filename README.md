@@ -10,4 +10,5 @@ you should follow the step below to get the whole code hub.
 - git submodule init
 - git submodule update
 
-Jim
+### copyright
+Jim Yang. MIT licence
