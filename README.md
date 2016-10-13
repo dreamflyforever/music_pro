@@ -1,9 +1,8 @@
+music_pro
+==========
+[![Build Status](https://travis-ci.org/dreamflyforever/music_pro.svg?branch=master)](https://travis-ci.org/dreamflyforever/music_pro)
+
 ### fusion file operate with music list
-
-- fop : `https://gitlab.spetechcular.com/shanjin.yang/music_list.git`
-
-- music_list : `https://gitlab.spetechcular.com/shanjin.yang/fop.git`
-
 This project use submodule to manage code, when you clone the hub,
 you should follow the step below to get the whole code hub.
 
