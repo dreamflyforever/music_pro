@@ -1,0 +1,11 @@
+language: c
+compiler:
+  - clang
+script:
+  - git submodule init
+  - git submodule update
+  - scons
+  - ./test_case
+notifications:
+  email:
+    - shanjin.yang@aispeech.com
