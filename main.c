@@ -39,6 +39,7 @@ int main()
 {
 	int retvalue = 1;
 	int fd;
+	void *fp;
 	struct op *o_obj;
 	music_obj *m_obj;
 
@@ -46,7 +47,8 @@ int main()
 	music_list_alloc(&m_obj, 20);
 
 	/*config file init*/
-	fd = file_create("./config");
+	fp = file_create("./config");
+	fd = *(int *)fp;
 	if (fd == -1) {
 		retvalue = -1;
 		goto end;
