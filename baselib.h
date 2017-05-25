@@ -6,10 +6,10 @@
 #include "music_list.h"
 
 int music_list_print(music_obj *m);
-int low_output_cb(int arg, char *s, int size);
+int low_output_cb(void *arg, char *s, int size);
 int high_output_cb(void *context, char *a, char *b, char *c);
 int cur_output_cb(void *context, char *a, char *b, char *c);
-int low_input_cb(int arg, char *s, int size);
+int low_input_cb(void *arg, char *s, int size);
 int high_node_get(struct op *o, music_obj *m);
 int machine_close(struct op *o, music_obj *m);
 int music_list_cur_prev_print(music_obj *m);

@@ -53,7 +53,7 @@ int main()
 	}
 
 	/*file operate init*/
-	op_init(&o_obj, fd, m_obj);
+	op_init(&o_obj, &fd, m_obj);
 	op_reg_low_output(o_obj, low_output_cb);
 	op_reg_high_output(o_obj, high_output_cb);
 	op_reg_low_input(o_obj, low_input_cb);

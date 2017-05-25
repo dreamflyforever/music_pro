@@ -268,10 +268,10 @@ end:
 }
 
 /*user callback*/
-int low_output_cb(int arg, char *s, int size)
+int low_output_cb(void *arg, char *s, int size)
 {
 	int retvalue = 1;
-	if (arg <= 0) {
+	if (arg == NULL) {
 		print("error\n");
 		retvalue = -1;
 		goto end;
@@ -330,11 +330,11 @@ end:
 }
 
 /*user callback*/
-int low_input_cb(int arg, char *s, int size)
+int low_input_cb(void *arg, char *s, int size)
 {
 	int retvalue = 1;
 
-	if (arg <= 0) {
+	if (arg == NULL) {
 		print("error\n");
 		retvalue = -1;
 		goto end;
